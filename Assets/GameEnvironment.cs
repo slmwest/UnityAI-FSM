@@ -9,7 +9,7 @@ public sealed class GameEnvironment
     private List<GameObject> checkpoints = new List<GameObject>();
     public List<GameObject> Checkpoints { get { return checkpoints; } }
 
-    // use singleton pattern to make easier
+    // use singleton pattern to make juggling all the states easier
     public static GameEnvironment Singleton
     {
         get
