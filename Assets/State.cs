@@ -51,9 +51,9 @@ public class State
         if (stage == EVENT.EXIT)
         {
             Exit();
-            return nextState;
+            return nextState; // return next state
         }
-        return this;
+        return this; // return current state
 
     }
 
@@ -83,7 +83,7 @@ public class Idle : State
             nextState = new Patrol(npc, agent, anim, player);
             stage = EVENT.EXIT;
         }
-        base.Update();
+        //base.Update(); // this prevents any exit transition from ever happening as it over-writes stage to be event.update again!
     }
 
     public override void Exit()
@@ -110,6 +110,7 @@ public class Patrol : State
     {
         currentIndex = 0;
         anim.SetTrigger("isWalking");
+        agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
         base.Enter();
     }
 
@@ -134,7 +135,7 @@ public class Patrol : State
             stage = EVENT.EXIT;
         }
 
-        base.Update();
+        //base.Update(); // this prevents any exit transition from ever happening as it over-writes stage to be event.update again!
     }
 
     public override void Exit()
