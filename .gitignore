@@ -361,3 +361,18 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/.vsconfig
+/Assembly-CSharp-Editor-firstpass.csproj
+/Assembly-CSharp-firstpass.csproj
+/Assembly-CSharp.csproj
+/Library
+/ProjectSettings
+/Temp
+/UnityAI-FSM.sln
+/UserSettings
+/Assets/GuardScene
+/Assets/Scenes
+/Assets/Scenes/SampleScene.unity
+/Assets/Standard Assets
+/Assets/FPCharacter.prefab
+/Assets/GuardScene.unity
