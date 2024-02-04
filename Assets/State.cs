@@ -71,6 +71,8 @@ public class Idle : State
 
     public override void Enter()
     {
+        agent.speed = 0; //navMesh property
+        agent.isStopped = true; //navMesh property
         anim.SetTrigger("isIdle");
         base.Enter();
     }
@@ -78,7 +80,7 @@ public class Idle : State
     public override void Update()
     {
         // probabilistic transitions from this state or remain in this state
-        if (Random.Range(0, 100) < 10)
+        if (Random.Range(0, 100) < 2)
         {
             nextState = new Patrol(npc, agent, anim, player);
             stage = EVENT.EXIT;
@@ -110,7 +112,7 @@ public class Patrol : State
     {
         currentIndex = 0;
         anim.SetTrigger("isWalking");
-        agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+        //agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
         base.Enter();
     }
 
@@ -129,7 +131,7 @@ public class Patrol : State
         }
 
         // probabilistic transitions from this state or remain in this state
-        if (Random.Range(0, 100) < 5) 
+        if (Random.Range(0, 1000) < -1) 
         {
             nextState = new Idle(npc, agent, anim, player);
             stage = EVENT.EXIT;

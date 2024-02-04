@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 // sealed means that class can NOT be inherited!
 public sealed class GameEnvironment
@@ -19,6 +20,8 @@ public sealed class GameEnvironment
                 instance = new GameEnvironment();
                 instance.Checkpoints.AddRange(
                     GameObject.FindGameObjectsWithTag("Checkpoint"));
+
+                instance.checkpoints = instance.checkpoints.OrderBy(x => x.name).ToList();
             }
             return instance;
         }
