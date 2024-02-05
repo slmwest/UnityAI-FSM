@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
@@ -54,7 +56,31 @@ public class State
             return nextState; // return next state
         }
         return this; // return current state
+    }
 
+    public bool CanSeePlayer()
+    {
+        // calculate angle using diretion vector and npc forward vector
+        Vector3 direction = player.position - npc.transform.position;
+        float angle = Vector3.Angle(direction, npc.transform.forward);
+
+        if (direction.magnitude < visDist && angle < visAngle) // 30degree in either direction gives 60degree arc
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool CanAttackPlayer()
+    {
+        // calculate angle using diretion vector and npc forward vector
+        Vector3 direction = player.position - npc.transform.position;
+        //float angle = Vector3.Angle(direction, npc.transform.forward);
+        if (direction.magnitude < shootDist) // && angle < visAngle) // 30degree in either direction gives 60degree arc
+        {
+            return true;
+        }
+        return false;
     }
 
 }
@@ -118,6 +144,13 @@ public class Patrol : State
 
     public override void Update()
     {
+        
+        //if (CanSeePlayer())
+        //{
+        //    nextState = new Pursue(npc, agent, anim, player);
+        //    stage = EVENT.EXIT;
+        //}
+        
         if (agent.remainingDistance < 1)
         {
             if (currentIndex >= GameEnvironment.Singleton.Checkpoints.Count - 1)
@@ -143,6 +176,85 @@ public class Patrol : State
     public override void Exit()
     {
         anim.ResetTrigger("isWalking"); // clean up queue of triggers, reduce risk of buggy anims. see McAdams system
+        base.Exit();
+    }
+}
+
+public class Pursue : State
+{
+    // constructor, where base keyword used to call constructor of the base class. We pass the Patrol inputs to the base class constructor.
+    public Pursue(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+        : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.PURSUE;
+        agent.speed = 5; //navMesh property. now running rather than walking!
+        agent.isStopped = false; //navMesh property
+    }
+
+    public override void Enter()
+    {
+        anim.SetTrigger("isRunning");
+        base.Enter();
+    }
+
+    public override void Update()
+    {
+        agent.SetDestination(player.transform.position);
+        if (agent.hasPath) // wait long enough for SetDestination to create a path. E.g. it could take at least one Update / Frame to get there!
+        {
+            if (CanAttackPlayer())
+            {
+                nextState = new Attack(npc, agent, anim, player);
+                stage = EVENT.EXIT;
+            }
+            else if (!CanSeePlayer())
+            {
+                nextState = new Patrol(npc, agent, anim, player);
+                stage = EVENT.EXIT;
+            }
+        }
+    }
+
+    public override void Exit()
+    {
+        anim.ResetTrigger("isRunning");
+        base.Exit();
+    }
+}
+
+
+public class Attack : State
+{
+    // should define these elsewhere!
+    float rotationSpeed = 2.0f;
+    AudioSource shoot; 
+
+    // constructor, where base keyword used to call constructor of the base class. We pass the Patrol inputs to the base class constructor.
+    public Attack(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+        : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.ATTACK;
+        shoot = _npc.GetComponent<AudioSource>(); // should define this elsewhere!
+    }
+
+    public override void Enter()
+    {
+        anim.SetTrigger("isShooting");
+        agent.isStopped = true;
+        shoot.Play();
+        base.Enter();
+    }
+
+    public override void Update()
+    {
+        // TO DO
+        base.Update();
+    }
+
+    public override void Exit()
+    {
+        anim.ResetTrigger("isShooting");
+        agent.isStopped = false;
         base.Exit();
     }
 }
