@@ -12,7 +12,7 @@ public class State
 {
     public enum STATE
     {
-        IDLE, PATROL, PURSUE, ATTACK, SLEEP
+        IDLE, PATROL, PURSUE, ATTACK, SLEEP, FLEE
     };
 
     public enum EVENT
@@ -123,12 +123,13 @@ public class Idle : State
     public override void Update()
     {
         
-        if (IsSurprisedByPlayer())
-        {
-            nextState = new Flee(npc, agent, anim, player);
-            stage = EVENT.EXIT;
-        }
-        else if (CanSeePlayer())
+        // better gameplay if can only transition to flee from Patrol
+        //if (IsSurprisedByPlayer())
+        //{
+        //    nextState = new Flee(npc, agent, anim, player);
+        //    stage = EVENT.EXIT;
+        //}
+        if (CanSeePlayer())
         {
             nextState = new Pursue(npc, agent, anim, player);
             stage = EVENT.EXIT;
