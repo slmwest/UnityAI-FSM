@@ -166,8 +166,7 @@ public class Patrol : State
                 currentIndex++;
             }
             agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
-            nextState = new Pursue(npc, agent, anim, player);
-            stage = EVENT.EXIT;
+            Debug.Log("Moving to next waypoint: " + currentIndex);
         }
 
         // probabilistic transitions from this state or remain in this state
