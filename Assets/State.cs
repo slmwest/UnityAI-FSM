@@ -30,8 +30,8 @@ public class State
 
     float visDist = 10.0f;
     float visAngle = 30.0f;
-    float surpriseDist = 3.0f;
-    float surpriseAngle = 120.0f;
+    float surpriseDist = 2.0f;
+    float surpriseAngle = 30.0f;
     float shootDist = 7.0f;
 
     // constructor
@@ -64,7 +64,7 @@ public class State
 
     public bool CanSeePlayer()
     {
-        // calculate angle using diretion vector and npc forward vector
+        // calculate angle using direction vector and npc forward vector, e.g. from npc perspective
         Vector3 direction = player.position - npc.transform.position;
         float angle = Vector3.Angle(direction, npc.transform.forward);
 
@@ -75,13 +75,13 @@ public class State
         return false;
     }
 
-    public bool IsSurprisedByPlayer()
+    public bool IsPlayerBehind()
     {
-        // calculate angle using diretion vector and npc forward vector
-        Vector3 direction = player.position - npc.transform.position;
+        // switch order of vector calculation, initial direction now from player perspective
+        Vector3 direction = npc.transform.position - player.position;
         float angle = Vector3.Angle(direction, npc.transform.forward);
 
-        if (direction.magnitude < surpriseDist && angle > surpriseAngle) // 30degree in either direction gives 60degree arc
+        if (direction.magnitude < surpriseDist && angle < surpriseAngle) // 30degree in either direction gives 60degree arc
         {
             return true;
         }
@@ -187,7 +187,7 @@ public class Patrol : State
     public override void Update()
     {
 
-        if (IsSurprisedByPlayer())
+        if (IsPlayerBehind())
         {
             nextState = new Flee(npc, agent, anim, player);
             stage = EVENT.EXIT;
