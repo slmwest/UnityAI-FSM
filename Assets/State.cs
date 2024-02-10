@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class State
 {
@@ -141,7 +143,20 @@ public class Patrol : State
 
     public override void Enter()
     {
-        currentIndex = 0;
+        // find nearest waypoint
+        float lastDist = Mathf.Infinity;
+        for (int i = 0; i < GameEnvironment.Singleton.Checkpoints.Count; i++)
+        {
+            GameObject thisWP = GameEnvironment.Singleton.Checkpoints[i];
+            float dist = Vector3.Distance(npc.transform.position, thisWP.transform.position);
+            if (dist < lastDist)
+            {
+                lastDist = dist;
+                currentIndex = i;
+            }
+        }
+        Debug.Log("Heading to waypoint " + currentIndex);
+
         anim.SetTrigger("isWalking");
         agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
         base.Enter();
