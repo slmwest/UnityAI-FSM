@@ -49,7 +49,7 @@ public class State
     public virtual void Update() { stage = EVENT.UPDATE; }
     public virtual void Exit() { stage = EVENT.EXIT; }
 
-    // progress throguh stages from Enter through Update to Exit
+    // progress through stages from Enter through Update to Exit
     public State Process()
     {
         if (stage == EVENT.ENTER) Enter();
@@ -77,7 +77,7 @@ public class State
 
     public bool IsPlayerBehind()
     {
-        // switch order of vector calculation, initial direction now from player perspective
+        // switch order of vector calculation from CanSeePlayer(), initial direction now from player perspective
         Vector3 direction = npc.transform.position - player.position;
         float angle = Vector3.Angle(direction, npc.transform.forward);
 
@@ -92,8 +92,8 @@ public class State
     {
         // calculate angle using diretion vector and npc forward vector
         Vector3 direction = player.position - npc.transform.position;
-        //float angle = Vector3.Angle(direction, npc.transform.forward);
-        if (direction.magnitude < shootDist) // && angle < visAngle) // 30degree in either direction gives 60degree arc
+        float angle = Vector3.Angle(direction, npc.transform.forward);
+        if (direction.magnitude < shootDist && angle < visAngle) // 30degree in either direction gives 60degree arc
         {
             return true;
         }
@@ -341,8 +341,9 @@ public class Flee : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.FLEE;
-        agent.speed = 5; //navMesh property. now running rather than walking!
+        agent.speed = 6; //navMesh property. now running rather than walking!
         agent.isStopped = false; //navMesh 
+        agent.angularSpeed += 5;
 
         safePlace = GameObject.FindGameObjectWithTag("Safe").transform;
     }
@@ -365,6 +366,7 @@ public class Flee : State
 
     public override void Exit()
     {
+        agent.angularSpeed -= 5;
         anim.ResetTrigger("isRunning");
         base.Exit();
     }
