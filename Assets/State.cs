@@ -303,3 +303,42 @@ public class Attack : State
         base.Exit();
     }
 }
+
+
+public class Flee : State
+{
+    Transform safePlace;
+
+    // constructor, where base keyword used to call constructor of the base class. We pass the Patrol inputs to the base class constructor.
+    public Flee(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+        : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.PURSUE;
+        agent.speed = 5; //navMesh property. now running rather than walking!
+        agent.isStopped = false; //navMesh 
+
+        safePlace = GameObject.FindGameObjectWithTag("Safe").transform;
+    }
+
+    public override void Enter()
+    {
+        anim.SetTrigger("isRunning");
+        base.Enter();
+    }
+
+    public override void Update()
+    {
+        agent.SetDestination(safePlace.position);
+        if (agent.hasPath && agent.remainingDistance < 1)
+        {
+            nextState = new Idle(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
+    }
+
+    public override void Exit()
+    {
+        anim.ResetTrigger("isRunning");
+        base.Exit();
+    }
+}
