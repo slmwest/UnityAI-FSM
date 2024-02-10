@@ -105,8 +105,13 @@ public class Idle : State
 
     public override void Update()
     {
+        if (CanSeePlayer())
+        {
+            nextState = new Pursue(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
         // probabilistic transitions from this state or remain in this state
-        if (Random.Range(0, 100) < 2)
+        else if (Random.Range(0, 100) < 2)
         {
             nextState = new Patrol(npc, agent, anim, player);
             stage = EVENT.EXIT;
@@ -138,20 +143,20 @@ public class Patrol : State
     {
         currentIndex = 0;
         anim.SetTrigger("isWalking");
-        //agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+        agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
         base.Enter();
     }
 
     public override void Update()
     {
         
-        //if (CanSeePlayer())
-        //{
-        //    nextState = new Pursue(npc, agent, anim, player);
-        //    stage = EVENT.EXIT;
-        //}
+        if (CanSeePlayer())
+        {
+            nextState = new Pursue(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
         
-        if (agent.remainingDistance < 1)
+        else if (agent.remainingDistance < 1)
         {
             if (currentIndex >= GameEnvironment.Singleton.Checkpoints.Count - 1)
             {
@@ -161,10 +166,12 @@ public class Patrol : State
                 currentIndex++;
             }
             agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+            nextState = new Pursue(npc, agent, anim, player);
+            stage = EVENT.EXIT;
         }
 
         // probabilistic transitions from this state or remain in this state
-        if (Random.Range(0, 1000) < -1) 
+        else if (Random.Range(0, 1000) < -1) 
         {
             nextState = new Idle(npc, agent, anim, player);
             stage = EVENT.EXIT;
@@ -199,7 +206,7 @@ public class Pursue : State
 
     public override void Update()
     {
-        agent.SetDestination(player.transform.position);
+        agent.SetDestination(player.position);
         if (agent.hasPath) // wait long enough for SetDestination to create a path. E.g. it could take at least one Update / Frame to get there!
         {
             if (CanAttackPlayer())
@@ -212,6 +219,10 @@ public class Pursue : State
                 nextState = new Patrol(npc, agent, anim, player);
                 stage = EVENT.EXIT;
             }
+        }
+        else
+        {
+            Debug.Log("No path found");
         }
     }
 
@@ -247,14 +258,34 @@ public class Attack : State
 
     public override void Update()
     {
-        // TO DO
-        base.Update();
+        // look at target
+        Vector3 direction = player.position - npc.transform.position;
+        direction.y = 0; // fix over y-axis
+        float angle = Vector3.Angle(direction, npc.transform.forward);
+        npc.transform.rotation = Quaternion.Slerp(npc.transform.rotation, 
+                                                  Quaternion.LookRotation(direction),
+                                                  Time.deltaTime * rotationSpeed);
+
+        // Transition to other states
+        if (!CanSeePlayer())
+        {
+            Debug.Log("Cannot see player. Go back to Idle.");
+            nextState = new Idle(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
+        else if (!CanAttackPlayer())
+        {
+            Debug.Log("Cannot attack player but can see, pursue!");
+            nextState = new Pursue(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
     }
 
     public override void Exit()
     {
         anim.ResetTrigger("isShooting");
         agent.isStopped = false;
+        shoot.Stop();
         base.Exit();
     }
 }
