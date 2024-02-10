@@ -340,7 +340,7 @@ public class Flee : State
     public Flee(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
         : base(_npc, _agent, _anim, _player)
     {
-        name = STATE.PURSUE;
+        name = STATE.FLEE;
         agent.speed = 5; //navMesh property. now running rather than walking!
         agent.isStopped = false; //navMesh 
 
